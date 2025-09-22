@@ -3,6 +3,11 @@ import type { Edge as EdgeType, Node as NodeType } from "@/type/common";
 import Edge from "@/component/edge";
 import Node from "@/component/node";
 
+const canvasBackgroundStyle = {
+  backgroundImage: 'radial-gradient(circle at 1px 1px, #cbd5e1 1px, transparent 0)',
+  backgroundSize: '20px 20px',
+};
+
 export default function Canvas() {
   const {
     nodes, edges, draggingNodeId, selectedNodeId,
@@ -23,7 +28,7 @@ export default function Canvas() {
       const newNodeId = `${Date.now()}`;
       const newNode: NodeType = {
         id: newNodeId,
-        position: { x: e.clientX, y: e.clientY },
+        position: { x: e.clientX - 80, y: e.clientY - 25 },
         data: { label: '새 주제' },
       };
 
@@ -40,7 +45,8 @@ export default function Canvas() {
 
   return (
     <div
-      className="canvas w-screen h-screen bg-gray-100 relative overflow-hidden"
+      className="canvas w-screen h-screen bg-slate-100 relative overflow-hidden"
+      style={canvasBackgroundStyle}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onClick={handleCanvasClick}

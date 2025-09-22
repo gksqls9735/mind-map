@@ -9,6 +9,7 @@ type MindMapState = {
   addNode: (node: Node) => void;
   addEdge: (edge: Edge) => void;
   updateNodePosition: (nodeId: string, movement: { x: number; y: number }) => void;
+  updateNodeDimension: (nodeId: string, dimersion: { width: number; height: number }) => void;
   setDraggingNodeId: (nodeId: string | null) => void;
   setSelectedNodeId: (nodeId: string | null) => void;
 }
@@ -32,6 +33,10 @@ export const useMindMapStore = create<MindMapState>((set) => ({
           ? { ...node, position: { x: node.position.x + movement.x, y: node.position.y + movement.y } }
           : node
       ),
+    })),
+  updateNodeDimension: (nodeId, dimension) =>
+    set((state) => ({
+      nodes: state.nodes.map((node) => node.id === nodeId ? { ...node, ...dimension } : node)
     })),
   setDraggingNodeId: (nodeId) => set({ draggingNodeId: nodeId }),
   setSelectedNodeId: (nodeId) => set({ selectedNodeId: nodeId }),
