@@ -2,6 +2,7 @@ import { useMindMapStore } from "@/store/store";
 import type { Edge as EdgeType, Node as NodeType } from "@/type/common";
 import Edge from "@/component/edge";
 import Node from "@/component/node";
+import { useRef } from "react";
 
 const canvasBackgroundStyle = {
   backgroundImage: 'radial-gradient(circle at 1px 1px, #cbd5e1 1px, transparent 0)',
@@ -15,15 +16,23 @@ export default function Canvas() {
     addNode, addEdge, setSelectedNodeId
   } = useMindMapStore();
 
+  const clickTimer = useRef<number | null>(null);
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (draggingNodeId) updateNodePosition(draggingNodeId, { x: e.movementX, y: e.movementY });
   };
 
   const handleMouseUp = () => setDraggingNodeId(null);
 
-  const handleCanvasClick = () => setSelectedNodeId(null);
+  const handleCanvasClick = () => {
+    clickTimer.current = window.setTimeout(() => {
+      setSelectedNodeId(null);
+    }, 200);
+  };
 
   const handleCanvasDoubleClick = (e: React.MouseEvent) => {
+    if (clickTimer.current) clearTimeout(clickTimer.current);
+
     if (selectedNodeId) {
       const newNodeId = `${Date.now()}`;
       const newNode: NodeType = {

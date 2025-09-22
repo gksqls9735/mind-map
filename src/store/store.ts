@@ -6,12 +6,15 @@ type MindMapState = {
   edges: Edge[];
   draggingNodeId: string | null;
   selectedNodeId: string | null;
+  editingNodeId: string | null;
   addNode: (node: Node) => void;
   addEdge: (edge: Edge) => void;
   updateNodePosition: (nodeId: string, movement: { x: number; y: number }) => void;
   updateNodeDimension: (nodeId: string, dimersion: { width: number; height: number }) => void;
+  updateNodeLabel: (nodeId: string, label: string) => void;
   setDraggingNodeId: (nodeId: string | null) => void;
   setSelectedNodeId: (nodeId: string | null) => void;
+  setEditingNodeId: (node: string | null) => void;
 }
 
 export const useMindMapStore = create<MindMapState>((set) => ({
@@ -24,6 +27,7 @@ export const useMindMapStore = create<MindMapState>((set) => ({
   ],
   draggingNodeId: null,
   selectedNodeId: null,
+  editingNodeId: null,
   addNode: (node) => set((state) => ({ nodes: [...state.nodes, node] })),
   addEdge: (edge) => set((state) => ({ edges: [...state.edges, edge] })),
   updateNodePosition: (nodeId, movement) =>
@@ -38,6 +42,11 @@ export const useMindMapStore = create<MindMapState>((set) => ({
     set((state) => ({
       nodes: state.nodes.map((node) => node.id === nodeId ? { ...node, ...dimension } : node)
     })),
+  updateNodeLabel: (nodeId, label) =>
+    set((state) => ({
+      nodes: state.nodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, label } } : node)
+    })),
   setDraggingNodeId: (nodeId) => set({ draggingNodeId: nodeId }),
   setSelectedNodeId: (nodeId) => set({ selectedNodeId: nodeId }),
+  setEditingNodeId: (nodeId) => set({ editingNodeId: nodeId }),
 }));
