@@ -15,6 +15,7 @@ export default function ({ node }: { node: NodeType }) {
     updateNodeLabel,
     addNode,
     addEdge,
+    deleteNode,
   } = useMindMapStore();
 
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -51,6 +52,14 @@ export default function ({ node }: { node: NodeType }) {
       let newEdge: EdgeType | null = null;
       const newNodeId = `${Date.now()}`;
 
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        console.log("삭제")
+        e.preventDefault();
+        console.log("삭제");
+        deleteNode(selectedNodeId);
+        setSelectedNodeId(null);
+      }
+
       // Tab 키로 자식 노드 생성
       if (e.key === 'Tab') {
         e.preventDefault();
@@ -86,7 +95,7 @@ export default function ({ node }: { node: NodeType }) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [editingNodeId, selectedNodeId, nodes, edges, addNode, addEdge, setSelectedNodeId]);
+  }, [editingNodeId, selectedNodeId, nodes, edges, addNode, addEdge, setSelectedNodeId, deleteNode]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isEditing) return;

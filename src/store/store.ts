@@ -15,6 +15,7 @@ type MindMapState = {
   setDraggingNodeId: (nodeId: string | null) => void;
   setSelectedNodeId: (nodeId: string | null) => void;
   setEditingNodeId: (node: string | null) => void;
+  deleteNode: (nodeIdToDelete: string | null) => void;
 }
 
 export const useMindMapStore = create<MindMapState>((set) => ({
@@ -49,4 +50,29 @@ export const useMindMapStore = create<MindMapState>((set) => ({
   setDraggingNodeId: (nodeId) => set({ draggingNodeId: nodeId }),
   setSelectedNodeId: (nodeId) => set({ selectedNodeId: nodeId }),
   setEditingNodeId: (nodeId) => set({ editingNodeId: nodeId }),
+  deleteNode: (nodeIdToDelete) => {
+    set((state) => {
+      if (!nodeIdToDelete) return {};
+      const newEdges = state.edges.filter(edge => edge.source !== nodeIdToDelete && edge.target !== nodeIdToDelete);
+
+      const nodesToDelete = new Set<string>();
+      nodesToDelete.add(nodeIdToDelete);
+
+      const findChildren = (nodeId: string) => {
+        const children = state.edges.filter(edge => edge.source === nodeId).map(edge => edge.target);
+        children.forEach(childId => {
+          nodesToDelete.add(childId);
+          findChildren(childId);
+        });
+      };
+      findChildren(nodeIdToDelete);
+
+      const newNodes = state.nodes.filter(node => !nodesToDelete.has(node.id));
+
+      return {
+        nodes: newNodes,
+        edges: newEdges,
+      };
+    })
+  },
 }));
