@@ -16,6 +16,7 @@ type MindMapState = {
   setSelectedNodeId: (nodeId: string | null) => void;
   setEditingNodeId: (node: string | null) => void;
   deleteNode: (nodeIdToDelete: string | null) => void;
+  setMindMap: (data: { nodes: Node[]; edges: Edge[] }) => void;
 }
 
 export const useMindMapStore = create<MindMapState>((set, get) => ({
@@ -70,4 +71,5 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
     const newNodes = currentNodes.filter(node => !nodesToDelete.has(node.id));
     return { nodes: newNodes, edges: newEdges };
   },
+  setMindMap: (data) => set({ nodes: data.nodes, edges: data.edges }),
 }));

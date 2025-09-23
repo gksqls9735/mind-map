@@ -13,7 +13,7 @@ export default function Canvas() {
   const {
     nodes, edges, draggingNodeId, selectedNodeId,
     updateNodePosition, setDraggingNodeId,
-    addNode, addEdge, setSelectedNodeId
+    addNode, addEdge, setSelectedNodeId, setMindMap
   } = useMindMapStore();
 
   const clickTimer = useRef<number | null>(null);
@@ -53,24 +53,47 @@ export default function Canvas() {
       addNode(newNode);
     }
 
-//    setSelectedNodeId(newNodeId);
+    //setSelectedNodeId(newNodeId);
+  };
+
+  const handleSave = () => {
+    const mindMapData = { nodes, edges };
+    window.electronAPI.saveFile(mindMapData);
+  };
+
+  const handleLoad = async () => {
+    const mindMapData = await window.electronAPI.loadFile();
+    if (mindMapData) {
+      setMindMap(mindMapData);
+    }
   };
 
   return (
-    <div
-      className="canvas w-screen h-screen bg-slate-100 relative overflow-hidden"
-      style={canvasBackgroundStyle}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onClick={handleCanvasClick}
-      onDoubleClick={handleCanvasDoubleClick}
-    >
-      {edges.map((edge) => (
-        <Edge key={edge.id} edge={edge} />
-      ))}
-      {nodes.map((node) => (
-        <Node key={node.id} node={node} />
-      ))}
+    <div>
+      <div className="absolute top-4 left-4 z-10 flex gap-2">
+        <button onClick={handleSave} className="px-4 py-2 bg-white rounded-md shadow-md">
+          Save
+        </button>
+        <button onClick={handleLoad} className="px-4 py-2 bg-white rounded-md shadow-md">
+          Load
+        </button>
+      </div>
+
+      <div
+        className="canvas w-screen h-screen bg-slate-100 relative overflow-hidden"
+        style={canvasBackgroundStyle}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onClick={handleCanvasClick}
+        onDoubleClick={handleCanvasDoubleClick}
+      >
+        {edges.map((edge) => (
+          <Edge key={edge.id} edge={edge} />
+        ))}
+        {nodes.map((node) => (
+          <Node key={node.id} node={node} />
+        ))}
+      </div>
     </div>
   );
 }
