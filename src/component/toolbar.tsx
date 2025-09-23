@@ -3,7 +3,7 @@ import { useNodeActions } from "@/hooks/use-node-actions";
 import { useMindMapStore } from "@/store/store";
 
 export default function Toolbar() {
-  const { selectedNodeId, updateNodeColor } = useMindMapStore();
+  const { selectedNodeId, updateNodeColor, autoLayout } = useMindMapStore();
   const { createChildNode, createSiblingNode, removeNode, canAddSibling } = useNodeActions();
 
   const handleColorChange = (color: string) => {
@@ -53,6 +53,18 @@ export default function Toolbar() {
               aria-label={`Change color to ${color}`}
             />
           ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-bold text-sm mb-2 px-1">Layout</h3>
+        <div className="flex flex-col gap-1">
+          <button
+            onClick={autoLayout}
+            className="w-full px-3 py-2 text-sm text-left bg-gray-100 hover:bg-indigo-200 rounded-md"
+          >
+            Auto-Arrange Tree
+          </button>
         </div>
       </div>
     </div>

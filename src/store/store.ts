@@ -1,5 +1,6 @@
 import type { Edge, Node } from "@/type/common";
 import { create } from "zustand";
+import { stratify, tree } from 'd3-hierarchy';
 
 type MindMapState = {
   nodes: Node[];
@@ -18,6 +19,7 @@ type MindMapState = {
   setEditingNodeId: (node: string | null) => void;
   deleteNode: (nodeIdToDelete: string | null) => void;
   setMindMap: (data: { nodes: Node[]; edges: Edge[] }) => void;
+  autoLayout: () => void;
 }
 
 export const useMindMapStore = create<MindMapState>((set, get) => ({
@@ -77,4 +79,73 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
     set({ nodes: newNodes, edges: newEdges, selectedNodeId: null })
   },
   setMindMap: (data) => set({ nodes: data.nodes, edges: data.edges }),
+  autoLayout: () => {
+    const currentNodes = get().nodes;
+    const currentEdges = get().edges;
+
+    if (currentNodes.length === 0) return;
+
+    // 데이터 준비 및 레이아웃 계산
+    const rootNodes = findRootNodes(currentNodes, currentEdges);
+    const VIRTUAL_ROOT_ID = '__VIRTUAL_ROOT__';
+    const virtualRootNode: Node = {
+      id: VIRTUAL_ROOT_ID,
+      position: { x: 0, y: 0 },
+      data: { label: 'Virtual Root' },
+    };
+    const virtualEdges: Edge[] = rootNodes.map(rootNode => ({
+      id: `v-${rootNode.id}`,
+      source: VIRTUAL_ROOT_ID,
+      target: rootNode.id,
+    }));
+    const allNodes = [...currentNodes, virtualRootNode];
+    const allEdges = [...currentEdges, ...virtualEdges];
+    const edgeMap = new Map(allEdges.map(edge => [edge.target, edge.source]));
+    
+    const root = stratify<Node>()
+      .id(d => d.id)
+      .parentId(d => edgeMap.get(d.id))
+      (allNodes);
+      
+    const treeLayout = tree<Node>()
+        .nodeSize([220, 120]); // 각 노드가 가로 220px, 세로 120px 공간을 차지하도록 설정
+    const treeData = treeLayout(root);
+    
+    // 1. 계산된 실제 노드들의 위치 정보만 추출
+    const calculatedNodes = treeData.descendants().filter(d3Node => d3Node.id !== VIRTUAL_ROOT_ID);
+    if (calculatedNodes.length === 0) return;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    calculatedNodes.forEach(d3Node => {
+      if (d3Node.x < minX) minX = d3Node.x;
+      if (d3Node.y < minY) minY = d3Node.y;
+    });
+
+    const PADDING = 50;
+    const offsetX = PADDING - minX;
+    const offsetY = PADDING - minY;
+
+    const newNodes = calculatedNodes.map(d3Node => {
+      const originalNode = d3Node.data;
+      return {
+        ...originalNode,
+        position: { 
+          x: d3Node.x + offsetX,
+          y: d3Node.y + offsetY,
+        },
+      };
+    });
+
+
+    set({ nodes: newNodes });
+  },
 }));
+
+// 루트 노드 찾기
+function findRootNodes(nodes: Node[], edges: Edge[]): Node[] {
+  const targetIds = new Set(edges.map(e => e.target));
+  const roots = nodes.filter(n => !targetIds.has(n.id));
+  // 만약 독립된 노드가 하나도 없다면 (순환 구조 등), 첫 노드를 루트로 반환
+  return roots.length > 0 ? roots : (nodes.length > 0 ? [nodes[0]] : []);
+}
