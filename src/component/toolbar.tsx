@@ -60,10 +60,16 @@ export default function Toolbar() {
         <h3 className="font-bold text-sm mb-2 px-1">Layout</h3>
         <div className="flex flex-col gap-1">
           <button
-            onClick={autoLayout}
+            onClick={() => autoLayout('tree')}
             className="w-full px-3 py-2 text-sm text-left bg-gray-100 hover:bg-indigo-200 rounded-md"
           >
             Auto-Arrange Tree
+          </button>
+          <button
+            onClick={() => autoLayout('radial')}
+            className="w-full px-3 py-2 text-sm text-left bg-gray-100 hover:bg-indigo-200 rounded-md"
+          >
+            Auto-Arrange Radial
           </button>
         </div>
       </div>

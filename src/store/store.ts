@@ -19,7 +19,7 @@ type MindMapState = {
   setEditingNodeId: (node: string | null) => void;
   deleteNode: (nodeIdToDelete: string | null) => void;
   setMindMap: (data: { nodes: Node[]; edges: Edge[] }) => void;
-  autoLayout: () => void;
+  autoLayout: (layoutType: 'tree' | 'radial') => void;
 }
 
 export const useMindMapStore = create<MindMapState>((set, get) => ({
@@ -79,7 +79,7 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
     set({ nodes: newNodes, edges: newEdges, selectedNodeId: null })
   },
   setMindMap: (data) => set({ nodes: data.nodes, edges: data.edges }),
-  autoLayout: () => {
+  autoLayout: (layoutType) => {
     const currentNodes = get().nodes;
     const currentEdges = get().edges;
 
@@ -101,42 +101,57 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
     const allNodes = [...currentNodes, virtualRootNode];
     const allEdges = [...currentEdges, ...virtualEdges];
     const edgeMap = new Map(allEdges.map(edge => [edge.target, edge.source]));
-    
+
     const root = stratify<Node>()
       .id(d => d.id)
       .parentId(d => edgeMap.get(d.id))
       (allNodes);
-      
-    const treeLayout = tree<Node>()
-        .nodeSize([220, 120]); // 각 노드가 가로 220px, 세로 120px 공간을 차지하도록 설정
-    const treeData = treeLayout(root);
-    
-    // 1. 계산된 실제 노드들의 위치 정보만 추출
-    const calculatedNodes = treeData.descendants().filter(d3Node => d3Node.id !== VIRTUAL_ROOT_ID);
-    if (calculatedNodes.length === 0) return;
 
-    let minX = Infinity;
-    let minY = Infinity;
-    calculatedNodes.forEach(d3Node => {
-      if (d3Node.x < minX) minX = d3Node.x;
-      if (d3Node.y < minY) minY = d3Node.y;
+    const layoutGenerator = layoutType === 'radial'
+      ? tree<Node>().size([2 * Math.PI, 350 * Math.ceil(rootNodes.length / 2)]) // 360도, 반지름
+      : tree<Node>().nodeSize([220, 120]); // 기존 트리 레이아웃
+
+    const treeData = layoutGenerator(root);
+
+    const calcNodes = treeData.descendants().filter(d3Node => d3Node.id !== VIRTUAL_ROOT_ID);
+    if (calcNodes.length === 0) return;
+
+    const positions = calcNodes.map(d3Node => {
+      if (layoutType === 'radial') {
+        // 방사형 레이아웃: d3Node.x는 각도, d3Node.y는 반지름
+        const angle = d3Node.x;
+        const radius = d3Node.y;
+        return {
+          x: radius * Math.cos(angle - Math.PI / 2),
+          y: radius * Math.sin(angle - Math.PI / 2),
+        };
+      } else {
+        // 트리 레이아웃: d3Node.x, d3Node.y는 그대로 사용
+        return { x: d3Node.x, y: d3Node.y };
+      }
+    });
+
+    let minX = Infinity, minY = Infinity;
+    positions.forEach(pos => {
+      if (pos.x < minX) minX = pos.x;
+      if (pos.y < minY) minY = pos.y;
     });
 
     const PADDING = 50;
     const offsetX = PADDING - minX;
     const offsetY = PADDING - minY;
 
-    const newNodes = calculatedNodes.map(d3Node => {
+    const newNodes = calcNodes.map((d3Node, i) => {
       const originalNode = d3Node.data;
+      const pos = positions[i];
       return {
         ...originalNode,
-        position: { 
-          x: d3Node.x + offsetX,
-          y: d3Node.y + offsetY,
+        position: {
+          x: pos.x + offsetX,
+          y: pos.y + offsetY,
         },
       };
     });
-
 
     set({ nodes: newNodes });
   },
