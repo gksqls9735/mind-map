@@ -3,17 +3,107 @@ import { RadialIcon } from "@/constants/icon";
 import { useNodeActions } from "@/hooks/use-node-actions";
 import { useMindMapStore } from "@/store/store";
 import { Network } from 'lucide-react';
+import { useEffect, useRef, useState } from "react";
 
 export default function Toolbar() {
   const { selectedNodeId, updateNodeColor, autoLayout, layoutMode } = useMindMapStore();
   const { createChildNode, createSiblingNode, removeNode, canAddSibling } = useNodeActions();
+
+  const [position, setPosition] = useState<{ x: number; y: number; }>({ x: window.innerWidth - 300, y: 20 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  const dragStartRef = useRef<{ mouseX: number, mouseY: number, toolbarX: number, toolbarY: number } | null>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragStartRef.current || !toolbarRef.current) return;
+
+      const dx = e.clientX - dragStartRef.current.mouseX;
+      const dy = e.clientY - dragStartRef.current.mouseY;
+      let newX = dragStartRef.current.toolbarX + dx;
+      let newY = dragStartRef.current.toolbarY + dy;
+
+      const toolbarWidth = toolbarRef.current.offsetWidth;
+      const toolbarHeight = toolbarRef.current.offsetHeight;
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      const PADDING = 10;
+
+      newX = Math.max(PADDING, Math.min(newX, windowWidth - toolbarWidth - PADDING));
+      newY = Math.max(PADDING, Math.min(newY, windowHeight - toolbarHeight - PADDING));
+
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => setIsDragging(false);
+
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const toolbarElement = toolbarRef.current;
+      if (!toolbarElement) return;
+
+      const PADDING = 10;
+
+      setPosition(prev => {
+        const toolbarWidth = toolbarElement.offsetWidth;
+        const toolbarHeight = toolbarElement.offsetHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+
+        const newX = Math.max(PADDING, Math.min(prev.x, windowWidth - toolbarWidth - PADDING));
+        const newY = Math.max(PADDING, Math.min(prev.y, windowHeight - toolbarHeight - PADDING));
+
+        return { x: newX, y: newY };
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    dragStartRef.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      toolbarX: position.x,
+      toolbarY: position.y,
+    }
+  }
 
   const handleColorChange = (color: string) => {
     if (selectedNodeId) updateNodeColor(selectedNodeId, color);
   };
 
   return (
-    <div className="absolute top-4 right-4 z-10 p-2 bg-white rounded-lg shadow-lg flex flex-col gap-4">
+    <div
+      ref={toolbarRef}
+      className="absolute z-10 p-3 bg-white rounded-lg shadow-xl flex flex-col gap-4 w-60"
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+      }}
+    >
+      <div
+        className="w-full text-center cursor-move text-gray-400"
+        onMouseDown={handleMouseDown}
+      >
+        &#x2630; Drag Me
+      </div>
+
       <div>
         <h3 className="font-bold text-sm mb-2 px-1">Actions</h3>
         <div className="flex flex-col gap-1">
