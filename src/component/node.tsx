@@ -25,6 +25,9 @@ export default function ({ node }: { node: NodeType }) {
 
   const [tempLabel, setTempLabel] = useState<string>(node.data.label);
 
+  const nodeColorClass = node.color || 'bg-white';
+  const selectedRingClass = isSelected ? 'ring-2 ring-purple-500 ring-offset-2' : 'border border-gray-300';
+
   useLayoutEffect(() => {
     if (nodeRef.current) {
       const width = nodeRef.current.offsetWidth;
@@ -53,9 +56,7 @@ export default function ({ node }: { node: NodeType }) {
       const newNodeId = `${Date.now()}`;
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        console.log("삭제")
         e.preventDefault();
-        console.log("삭제");
         deleteNode(selectedNodeId);
         setSelectedNodeId(null);
       }
@@ -137,10 +138,8 @@ export default function ({ node }: { node: NodeType }) {
         font-semibold text-gray-800 shadow-md hover:shadow-xl
         transition duration-200 ease-in-out
         w-48 break-words text-center
-        ${isSelected
-          ? 'bg-purple-100 ring-2 ring-purple-500 ring-offset-2'
-          : 'bg-white border border-gray-300'
-        }
+        flex items-center justify-center
+        ${nodeColorClass} ${selectedRingClass}
       `}
       style={{
         left: node.position.x,

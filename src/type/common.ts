@@ -4,6 +4,7 @@ export interface Node {
   data: { label: string };
   width?: number;
   height?: number;
+  color?: string;
 }
 
 export interface Edge {

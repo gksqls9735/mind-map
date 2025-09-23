@@ -12,6 +12,7 @@ type MindMapState = {
   updateNodePosition: (nodeId: string, movement: { x: number; y: number }) => void;
   updateNodeDimension: (nodeId: string, dimersion: { width: number; height: number }) => void;
   updateNodeLabel: (nodeId: string, label: string) => void;
+  updateNodeColor: (nodeId: string, color: string) => void;
   setDraggingNodeId: (nodeId: string | null) => void;
   setSelectedNodeId: (nodeId: string | null) => void;
   setEditingNodeId: (node: string | null) => void;
@@ -21,8 +22,8 @@ type MindMapState = {
 
 export const useMindMapStore = create<MindMapState>((set, get) => ({
   nodes: [
-    { id: '1', position: { x: 100, y: 100 }, data: { label: '중심 주제' } },
-    { id: '2', position: { x: 300, y: 100 }, data: { label: '하위 주제' } },
+    { id: '1', position: { x: 100, y: 100 }, data: { label: '중심 주제' }, color: 'bg-amber-200' },
+    { id: '2', position: { x: 300, y: 100 }, data: { label: '하위 주제' }, color: 'bg-sky-200' },
   ],
   edges: [
     { id: 'e1-2', source: '1', target: '2' },
@@ -48,11 +49,15 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
     set((state) => ({
       nodes: state.nodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, label } } : node)
     })),
+  updateNodeColor: (nodeId, color) =>
+    set((state) => ({
+      nodes: state.nodes.map((node) => node.id === nodeId ? { ...node, color } : node)
+    })),
   setDraggingNodeId: (nodeId) => set({ draggingNodeId: nodeId }),
   setSelectedNodeId: (nodeId) => set({ selectedNodeId: nodeId }),
   setEditingNodeId: (nodeId) => set({ editingNodeId: nodeId }),
   deleteNode: (nodeIdToDelete) => {
-    if (!nodeIdToDelete) return {};
+    if (!nodeIdToDelete) return;
     const currentEdges = get().edges;
     const currentNodes = get().nodes;
 
@@ -69,7 +74,7 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
     findChildren(nodeIdToDelete);
 
     const newNodes = currentNodes.filter(node => !nodesToDelete.has(node.id));
-    return { nodes: newNodes, edges: newEdges };
+    set({ nodes: newNodes, edges: newEdges, selectedNodeId: null })
   },
   setMindMap: (data) => set({ nodes: data.nodes, edges: data.edges }),
 }));

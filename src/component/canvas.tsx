@@ -3,6 +3,7 @@ import type { Edge as EdgeType, Node as NodeType } from "@/type/common";
 import Edge from "@/component/edge";
 import Node from "@/component/node";
 import { useRef } from "react";
+import Toolbar from "./toolbar";
 
 const canvasBackgroundStyle = {
   backgroundImage: 'radial-gradient(circle at 1px 1px, #cbd5e1 1px, transparent 0)',
@@ -78,6 +79,8 @@ export default function Canvas() {
           Load
         </button>
       </div>
+
+      <Toolbar />
 
       <div
         className="canvas w-screen h-screen bg-slate-100 relative overflow-hidden"
