@@ -1,9 +1,11 @@
-import { availableColors } from "@/constants";
+import { availableColors } from "@/constants/constants";
+import { RadialIcon } from "@/constants/icon";
 import { useNodeActions } from "@/hooks/use-node-actions";
 import { useMindMapStore } from "@/store/store";
+import { Network } from 'lucide-react';
 
 export default function Toolbar() {
-  const { selectedNodeId, updateNodeColor, autoLayout } = useMindMapStore();
+  const { selectedNodeId, updateNodeColor, autoLayout, layoutMode } = useMindMapStore();
   const { createChildNode, createSiblingNode, removeNode, canAddSibling } = useNodeActions();
 
   const handleColorChange = (color: string) => {
@@ -57,19 +59,32 @@ export default function Toolbar() {
       </div>
 
       <div>
-        <h3 className="font-bold text-sm mb-2 px-1">Layout</h3>
-        <div className="flex flex-col gap-1">
+        <h3 className="font-bold text-sm mb-2 px-1 text-gray-700">Layout</h3>
+        <div className="flex gap-2">
           <button
             onClick={() => autoLayout('tree')}
-            className="w-full px-3 py-2 text-sm text-left bg-gray-100 hover:bg-indigo-200 rounded-md"
+            className={`flex-1 p-3 rounded-lg transition-colors
+              ${layoutMode === 'tree'
+                ? 'bg-indigo-500 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-indigo-100'
+              }
+            `}
+            title="Tree Layout"
           >
-            Auto-Arrange Tree
+            <Network size={28} className="mx-auto" />
           </button>
+
           <button
             onClick={() => autoLayout('radial')}
-            className="w-full px-3 py-2 text-sm text-left bg-gray-100 hover:bg-indigo-200 rounded-md"
+            className={`flex-1 p-3 rounded-lg transition-colors
+              ${layoutMode === 'radial'
+                ? 'bg-indigo-500 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-indigo-100'
+              }
+            `}
+            title="Radial Layout"
           >
-            Auto-Arrange Radial
+            <RadialIcon size={28} className="mx-auto" />
           </button>
         </div>
       </div>

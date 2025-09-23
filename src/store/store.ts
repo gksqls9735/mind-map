@@ -2,12 +2,15 @@ import type { Edge, Node } from "@/type/common";
 import { create } from "zustand";
 import { stratify, tree } from 'd3-hierarchy';
 
+type LayoutMode = 'tree' | 'radial' | 'none';
+
 type MindMapState = {
   nodes: Node[];
   edges: Edge[];
   draggingNodeId: string | null;
   selectedNodeId: string | null;
   editingNodeId: string | null;
+  layoutMode: LayoutMode;
   addNode: (node: Node) => void;
   addEdge: (edge: Edge) => void;
   updateNodePosition: (nodeId: string, movement: { x: number; y: number }) => void;
@@ -19,7 +22,7 @@ type MindMapState = {
   setEditingNodeId: (node: string | null) => void;
   deleteNode: (nodeIdToDelete: string | null) => void;
   setMindMap: (data: { nodes: Node[]; edges: Edge[] }) => void;
-  autoLayout: (layoutType: 'tree' | 'radial') => void;
+  autoLayout: (layoutType: LayoutMode) => void;
 }
 
 export const useMindMapStore = create<MindMapState>((set, get) => ({
@@ -33,6 +36,7 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
   draggingNodeId: null,
   selectedNodeId: null,
   editingNodeId: null,
+  layoutMode: 'none',
   addNode: (node) => set((state) => ({ nodes: [...state.nodes, node] })),
   addEdge: (edge) => set((state) => ({ edges: [...state.edges, edge] })),
   updateNodePosition: (nodeId, movement) =>
@@ -42,10 +46,11 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
           ? { ...node, position: { x: node.position.x + movement.x, y: node.position.y + movement.y } }
           : node
       ),
+      layoutMode: 'none',
     })),
   updateNodeDimension: (nodeId, dimension) =>
     set((state) => ({
-      nodes: state.nodes.map((node) => node.id === nodeId ? { ...node, ...dimension } : node)
+      nodes: state.nodes.map((node) => node.id === nodeId ? { ...node, ...dimension } : node),
     })),
   updateNodeLabel: (nodeId, label) =>
     set((state) => ({
@@ -153,7 +158,7 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
       };
     });
 
-    set({ nodes: newNodes });
+    set({ nodes: newNodes, layoutMode: layoutType });
   },
 }));
 
