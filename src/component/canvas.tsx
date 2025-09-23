@@ -33,14 +33,14 @@ export default function Canvas() {
   const handleCanvasDoubleClick = (e: React.MouseEvent) => {
     if (clickTimer.current) clearTimeout(clickTimer.current);
 
-    if (selectedNodeId) {
-      const newNodeId = `${Date.now()}`;
-      const newNode: NodeType = {
-        id: newNodeId,
-        position: { x: e.clientX - 80, y: e.clientY - 25 },
-        data: { label: '새 주제' },
-      };
+    const newNodeId = `${Date.now()}`;
+    const newNode: NodeType = {
+      id: newNodeId,
+      position: { x: e.clientX - 80, y: e.clientY - 25 },
+      data: { label: '새 주제' },
+    };
 
+    if (selectedNodeId) {
       const newEdge: EdgeType = {
         id: `e${selectedNodeId}-${newNodeId}`,
         source: selectedNodeId,
@@ -49,7 +49,11 @@ export default function Canvas() {
 
       addNode(newNode);
       addEdge(newEdge);
+    } else {
+      addNode(newNode);
     }
+
+//    setSelectedNodeId(newNodeId);
   };
 
   return (

@@ -18,7 +18,7 @@ type MindMapState = {
   deleteNode: (nodeIdToDelete: string | null) => void;
 }
 
-export const useMindMapStore = create<MindMapState>((set) => ({
+export const useMindMapStore = create<MindMapState>((set, get) => ({
   nodes: [
     { id: '1', position: { x: 100, y: 100 }, data: { label: '중심 주제' } },
     { id: '2', position: { x: 300, y: 100 }, data: { label: '하위 주제' } },
@@ -51,28 +51,23 @@ export const useMindMapStore = create<MindMapState>((set) => ({
   setSelectedNodeId: (nodeId) => set({ selectedNodeId: nodeId }),
   setEditingNodeId: (nodeId) => set({ editingNodeId: nodeId }),
   deleteNode: (nodeIdToDelete) => {
-    set((state) => {
-      if (!nodeIdToDelete) return {};
-      const newEdges = state.edges.filter(edge => edge.source !== nodeIdToDelete && edge.target !== nodeIdToDelete);
+    if (!nodeIdToDelete) return {};
+    const currentEdges = get().edges;
+    const currentNodes = get().nodes;
 
-      const nodesToDelete = new Set<string>();
-      nodesToDelete.add(nodeIdToDelete);
+    const newEdges = currentEdges.filter(edge => edge.source !== nodeIdToDelete && edge.target !== nodeIdToDelete);
 
-      const findChildren = (nodeId: string) => {
-        const children = state.edges.filter(edge => edge.source === nodeId).map(edge => edge.target);
-        children.forEach(childId => {
-          nodesToDelete.add(childId);
-          findChildren(childId);
-        });
-      };
-      findChildren(nodeIdToDelete);
+    const nodesToDelete = new Set<string>([nodeIdToDelete]);
 
-      const newNodes = state.nodes.filter(node => !nodesToDelete.has(node.id));
+    const findChildren = (nodeId: string) => {
+      currentEdges.filter(edge => edge.source === nodeId).forEach(edge => {
+        nodesToDelete.add(edge.target);
+        findChildren(edge.target);
+      })
+    };
+    findChildren(nodeIdToDelete);
 
-      return {
-        nodes: newNodes,
-        edges: newEdges,
-      };
-    })
+    const newNodes = currentNodes.filter(node => !nodesToDelete.has(node.id));
+    return { nodes: newNodes, edges: newEdges };
   },
 }));
