@@ -174,13 +174,16 @@ export default function Toolbar() {
         className="flex items-center justify-between cursor-move h-8 -mt-1"
         onMouseDown={handleMouseDown as React.MouseEventHandler<HTMLDivElement>}
       >
-        <div className="flex-grow flex items-center justify-center text-gray-400 font-bold">
+        <div className="w-7" />
+
+        <div className="flex items-center justify-center text-gray-400 font-bold">
           Toolbar
         </div>
+
         <button
           onClick={handleToggleView}
           onMouseDown={(e) => e.stopPropagation()}
-          className="p-1 text-gray-500 hover:bg-gray-200 rounded-full cursor-pointer"
+          className="p-1 w-7 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-200 rounded-full cursor-pointer"
           title={getToggleTitle()}
         >
           {getToggleIcon()}
