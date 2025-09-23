@@ -1,11 +1,10 @@
+import { useNodeActions } from "@/hooks/use-node-actions";
 import { useMindMapStore } from "@/store/store";
-import type { Node as NodeType, Edge as EdgeType } from "@/type/common";
+import type { Node as NodeType } from "@/type/common";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export default function ({ node }: { node: NodeType }) {
   const {
-    nodes,
-    edges,
     setDraggingNodeId,
     selectedNodeId,
     setSelectedNodeId,
@@ -13,8 +12,6 @@ export default function ({ node }: { node: NodeType }) {
     editingNodeId,
     setEditingNodeId,
     updateNodeLabel,
-    addNode,
-    addEdge,
     deleteNode,
   } = useMindMapStore();
 
@@ -24,6 +21,8 @@ export default function ({ node }: { node: NodeType }) {
   const isEditing = editingNodeId === node.id;
 
   const [tempLabel, setTempLabel] = useState<string>(node.data.label);
+
+  const { createChildNode, createSiblingNode, removeNode } = useNodeActions();
 
   const nodeColorClass = node.color || 'bg-white';
   const selectedRingClass = isSelected ? 'ring-2 ring-purple-500 ring-offset-2' : 'border border-gray-300';
@@ -47,56 +46,30 @@ export default function ({ node }: { node: NodeType }) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (editingNodeId || !selectedNodeId) return;
 
-      const selectedNode = nodes.find(n => n.id === selectedNodeId);
-      if (!selectedNode) return;
-
-
-      let newNode: NodeType | null = null;
-      let newEdge: EdgeType | null = null;
-      const newNodeId = `${Date.now()}`;
-
-      if (e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        deleteNode(selectedNodeId);
-        setSelectedNodeId(null);
-      }
-
       // Tab 키로 자식 노드 생성
       if (e.key === 'Tab') {
         e.preventDefault();
-        newNode = {
-          id: newNodeId,
-          position: { x: selectedNode.position.x + (selectedNode.width ?? 150) + 50, y: selectedNode.position.y },
-          data: { label: '새 주제' },
-        };
-        newEdge = { id: `e${selectedNodeId}-${newNodeId}`, source: selectedNodeId, target: newNodeId };
+        createChildNode();
       }
 
       // Enter 키로 형제 노드 생성 (부모가 있을 경우)
       if (e.key === 'Enter') {
         e.preventDefault();
         e.stopPropagation();
-        const parentEdge = useMindMapStore.getState().edges.find(edge => edge.target === selectedNodeId);
-        if (parentEdge) {
-          newNode = {
-            id: newNodeId,
-            position: { x: selectedNode.position.x, y: selectedNode.position.y + (selectedNode.height ?? 50) + 30 },
-            data: { label: '새 주제' },
-          };
-          newEdge = { id: `e${parentEdge.source}-${newNodeId}`, source: parentEdge.source, target: newNodeId };
-        }
+        createSiblingNode();
       }
 
-      if (newNode && newEdge) {
-        addNode(newNode);
-        addEdge(newEdge);
-        setSelectedNodeId(newNodeId);
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        removeNode();
       }
+
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [editingNodeId, selectedNodeId, nodes, edges, addNode, addEdge, setSelectedNodeId, deleteNode]);
+  }, [editingNodeId, selectedNodeId, createChildNode, createSiblingNode, deleteNode]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isEditing) return;

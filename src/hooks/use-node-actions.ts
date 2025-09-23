@@ -2,7 +2,7 @@ import { useMindMapStore } from "@/store/store";
 import type { Edge as EdgeType, Node as NodeType } from "@/type/common";
 
 export function useNodeActions() {
-  const { nodes, edges, addNode, addEdge, selectedNodeId, setSelectedNodeId } = useMindMapStore();
+  const { nodes, edges, addNode, addEdge, selectedNodeId, setSelectedNodeId, deleteNode } = useMindMapStore();
 
   const createChildNode = () => {
     if (!selectedNodeId) return;
@@ -64,7 +64,11 @@ export function useNodeActions() {
     setSelectedNodeId(newNodeId);
   };
 
+    const removeNode = () => {
+    if (selectedNodeId) deleteNode(selectedNodeId);
+  };
+
   const canAddSibling = !!selectedNodeId && edges.some(edge => edge.target === selectedNodeId);
 
-  return { createChildNode, createSiblingNode, canAddSibling };
+  return { createChildNode, createSiblingNode, removeNode, canAddSibling };
 }

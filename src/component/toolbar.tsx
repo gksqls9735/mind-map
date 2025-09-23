@@ -3,15 +3,11 @@ import { useNodeActions } from "@/hooks/use-node-actions";
 import { useMindMapStore } from "@/store/store";
 
 export default function Toolbar() {
-  const { selectedNodeId, updateNodeColor, deleteNode } = useMindMapStore();
-  const { createChildNode, createSiblingNode, canAddSibling } = useNodeActions();
+  const { selectedNodeId, updateNodeColor } = useMindMapStore();
+  const { createChildNode, createSiblingNode, removeNode, canAddSibling } = useNodeActions();
 
   const handleColorChange = (color: string) => {
     if (selectedNodeId) updateNodeColor(selectedNodeId, color);
-  };
-
-  const handleDelete = () => {
-    if (selectedNodeId) deleteNode(selectedNodeId);
   };
 
   return (
@@ -36,7 +32,7 @@ export default function Toolbar() {
           </button>
 
           <button
-            onClick={handleDelete}
+            onClick={removeNode}
             disabled={!selectedNodeId}
             className="w-full px-3 py-2 text-sm text-left bg-gray-100 hover:bg-red-200 rounded-md disabled:opacity-50"
           >
