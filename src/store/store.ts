@@ -12,6 +12,7 @@ type MindMapState = {
   editingNodeId: string | null;
   layoutMode: LayoutMode;
   viewOffset: { x: number; y: number };
+  zoom: number;
   addNode: (node: Node) => void;
   addEdge: (edge: Edge) => void;
   updateNodePosition: (nodeId: string, movement: { x: number; y: number }) => void;
@@ -25,6 +26,7 @@ type MindMapState = {
   setMindMap: (data: { nodes: Node[]; edges: Edge[] }) => void;
   autoLayout: (layoutType: LayoutMode) => void;
   panView: (delta: { dx: number; dy: number }) => void;
+  zoomToPoint: (delta: number, point: { x: number; y: number }) => void;
 }
 
 export const useMindMapStore = create<MindMapState>((set, get) => ({
@@ -40,6 +42,7 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
   editingNodeId: null,
   layoutMode: 'none',
   viewOffset: { x: 0, y: 0 },
+  zoom: 1,
   addNode: (node) => set((state) => ({ nodes: [...state.nodes, node] })),
   addEdge: (edge) => set((state) => ({ edges: [...state.edges, edge] })),
   updateNodePosition: (nodeId, movement) =>
@@ -169,6 +172,17 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
       y: state.viewOffset.y + delta.dy,
     }
   })),
+  zoomToPoint: (delta, point) => {
+    const currentZoom = get().zoom;
+    const currentViewOffset = get().viewOffset;
+    const newZoom = Math.max(0.1, Math.min(currentZoom - delta * 0.001, 5));  // 줌 범위 제한 (10% ~ 500%)
+
+    // 마우스 포인터를 기준으로 viewOffset을 재계산하여 확대/축소 효과를 만듦
+    const newViewOffsetX = point.x - (point.x - currentViewOffset.x) * (newZoom / currentZoom);
+    const newViewOffsetY = point.y - (point.y - currentViewOffset.y) * (newZoom / currentZoom);
+
+    set({ zoom: newZoom, viewOffset: { x: newViewOffsetX, y: newViewOffsetY } });
+  },
 }));
 
 // 루트 노드 찾기

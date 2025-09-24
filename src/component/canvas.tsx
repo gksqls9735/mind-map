@@ -12,14 +12,14 @@ export default function Canvas() {
   const {
     handleMouseMove, handleMouseUp, handleCanvasClick,
     handleCanvasDoubleClick,
-    handleCanvasMouseDown,
+    handleCanvasMouseDown, handleWheel,
     edges, nodes,
-    viewOffset, isPannable, isPanning,
+    viewOffset, isPannable, isPanning, zoom
   } = useCanvas();
 
   return (
     <div>
-      
+
       <Toolbar />
 
       <div
@@ -33,18 +33,20 @@ export default function Canvas() {
         onClick={handleCanvasClick}
         onDoubleClick={handleCanvasDoubleClick}
         onMouseDown={handleCanvasMouseDown}
+        onWheel={handleWheel}
         onContextMenu={(e) => e.preventDefault()}
       >
         <div
           style={{
-            transform: `translate(${viewOffset.x}px, ${viewOffset.y}px)`,
+            transform: `translate(${viewOffset.x}px, ${viewOffset.y}px) scale(${zoom})`,
+            transformOrigin: 'top left',
           }}
         >
           <svg
             className="absolute top-0 left-0"
             width="10000"
             height="10000"
-            style={{ 
+            style={{
               pointerEvents: 'none',
             }}
           >

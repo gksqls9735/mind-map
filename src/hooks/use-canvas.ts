@@ -8,7 +8,8 @@ export function useCanvas() {
     nodes, edges, draggingNodeId, selectedNodeId,
     updateNodePosition, setDraggingNodeId,
     addNode, addEdge, setSelectedNodeId,
-    viewOffset, panView
+    viewOffset, panView,
+    zoom, zoomToPoint
   } = useMindMapStore();
 
   const clickTimer = useRef<number | null>(null);
@@ -38,6 +39,12 @@ export function useCanvas() {
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const point = { x: e.clientX, y: e.clientX };
+    zoomToPoint(e.deltaY, point);
+  }
 
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
     if (isPannable && e.button === 0) {
@@ -93,8 +100,9 @@ export function useCanvas() {
   };
 
   return {
-    handleMouseMove, handleMouseUp, handleCanvasClick, handleCanvasDoubleClick, handleCanvasMouseDown,
+    handleMouseMove, handleMouseUp, handleCanvasClick, handleCanvasDoubleClick, handleCanvasMouseDown, handleWheel,
     edges, nodes,
     viewOffset, isPannable, isPanning,
+    zoom,
   };
 }
