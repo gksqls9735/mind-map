@@ -7,7 +7,7 @@ export function useCanvas() {
   const {
     nodes, edges, draggingNodeId, selectedNodeId,
     updateNodePosition, setDraggingNodeId,
-    addNode, addEdge, setSelectedNodeId, setMindMap,
+    addNode, addEdge, setSelectedNodeId,
     viewOffset, panView
   } = useMindMapStore();
 
@@ -92,21 +92,8 @@ export function useCanvas() {
     //setSelectedNodeId(newNodeId);
   };
 
-  const handleSave = () => {
-    const mindMapData = { nodes, edges };
-    window.electronAPI.saveFile(mindMapData);
-  };
-
-  const handleLoad = async () => {
-    const mindMapData = await window.electronAPI.loadFile();
-    if (mindMapData) {
-      setMindMap(mindMapData);
-    }
-  };
-
   return {
-    handleMouseMove, handleMouseUp, handleCanvasClick, handleCanvasDoubleClick,
-    handleSave, handleLoad, handleCanvasMouseDown,
+    handleMouseMove, handleMouseUp, handleCanvasClick, handleCanvasDoubleClick, handleCanvasMouseDown,
     edges, nodes,
     viewOffset, isPannable, isPanning,
   };

@@ -11,7 +11,7 @@ const canvasBackgroundStyle = {
 export default function Canvas() {
   const {
     handleMouseMove, handleMouseUp, handleCanvasClick,
-    handleCanvasDoubleClick, handleSave, handleLoad,
+    handleCanvasDoubleClick,
     handleCanvasMouseDown,
     edges, nodes,
     viewOffset, isPannable, isPanning,
@@ -19,15 +19,7 @@ export default function Canvas() {
 
   return (
     <div>
-      <div className="absolute top-4 left-4 z-10 flex gap-2">
-        <button onClick={handleSave} className="px-4 py-2 bg-white rounded-md shadow-md">
-          Save
-        </button>
-        <button onClick={handleLoad} className="px-4 py-2 bg-white rounded-md shadow-md">
-          Load
-        </button>
-      </div>
-
+      
       <Toolbar />
 
       <div

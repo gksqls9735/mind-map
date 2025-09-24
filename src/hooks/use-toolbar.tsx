@@ -5,7 +5,7 @@ import { ChevronsDownUp, ChevronsUpDown, Minimize2 } from "lucide-react";
 type ViewMode = 'expanded' | 'summary' | 'collapsed';
 
 export function useToolbar() {
-  const { selectedNodeId, updateNodeColor, autoLayout, layoutMode } = useMindMapStore();
+  const { selectedNodeId, updateNodeColor, autoLayout, layoutMode, setMindMap, nodes, edges } = useMindMapStore();
 
   const [viewMode, setViewMode] = useState<ViewMode>('expanded');
 
@@ -144,11 +144,25 @@ export function useToolbar() {
     }
   };
 
+  const handleSave = () => {
+    const mindMapData = { nodes, edges };
+    window.electronAPI.saveFile(mindMapData);
+  };
+
+  const handleLoad = async () => {
+    const mindMapData = await window.electronAPI.loadFile();
+    if (mindMapData) {
+      setMindMap(mindMapData);
+    }
+  };
+
+
   return {
     autoLayout, layoutMode,
     handleMouseDown, handleColorChange, handleToggleView,
     getToggleIcon, getToggleTitle,
     viewMode, position,
-    toolbarRef, selectedNodeId
+    toolbarRef, selectedNodeId,
+    handleSave, handleLoad,
   };
 };

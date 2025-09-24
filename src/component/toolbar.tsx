@@ -10,7 +10,8 @@ export default function Toolbar() {
     handleMouseDown, handleColorChange, handleToggleView,
     getToggleIcon, getToggleTitle,
     viewMode, position,
-    toolbarRef, selectedNodeId
+    toolbarRef, selectedNodeId,
+    handleSave, handleLoad
   } = useToolbar();
   const { createChildNode, createSiblingNode, removeNode, canAddSibling } = useNodeActions();
 
@@ -57,6 +58,20 @@ export default function Toolbar() {
       </div>
 
       <>
+        <div>
+          <h3 className="font-bold text-sm mb-2 px-1">File</h3>
+          {viewMode === 'expanded' && (
+            <div className="flex gap-2">
+              <button onClick={handleSave} className="flex-1 px-3 py-2 text-sm text-center bg-gray-100 hover:bg-gray-200 rounded-md">
+                Save
+              </button>
+              <button onClick={handleLoad} className="flex-1 px-3 py-2 text-sm text-center bg-gray-100 hover:bg-gray-200 rounded-md">
+                Load
+              </button>
+            </div>
+          )}
+        </div>
+
         <div>
           <h3 className="font-bold text-sm mb-2 px-1">Actions</h3>
           {viewMode === 'expanded' && (
