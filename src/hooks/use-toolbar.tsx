@@ -149,6 +149,8 @@ export function useToolbar() {
     window.electronAPI.saveFile(mindMapData);
   };
 
+  const canSave = nodes.length > 0;
+
   const handleLoad = async () => {
     const mindMapData = await window.electronAPI.loadFile();
     if (mindMapData) {
@@ -163,6 +165,6 @@ export function useToolbar() {
     getToggleIcon, getToggleTitle,
     viewMode, position,
     toolbarRef, selectedNodeId,
-    handleSave, handleLoad,
+    handleSave, handleLoad, canSave
   };
 };
