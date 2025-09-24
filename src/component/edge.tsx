@@ -19,15 +19,13 @@ export default function Edge({ edge }: { edge: EdgeType }) {
   const y2 = targetNode.position.y + targetHeight / 2;
 
   return (
-    <svg
-      className="absolute z-0"
-      style={{
-        width: '100vw',
-        height: '100vh',
-        pointerEvents: 'none',
-      }}
-    >
-      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#6b7280" strokeWidth="2" />
-    </svg>
+    <line 
+      x1={x1} 
+      y1={y1} 
+      x2={x2} 
+      y2={y2} 
+      stroke="#9ca3af"
+      strokeWidth="2" 
+    />
   );
 }

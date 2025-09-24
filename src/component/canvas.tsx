@@ -48,9 +48,18 @@ export default function Canvas() {
             transform: `translate(${viewOffset.x}px, ${viewOffset.y}px)`,
           }}
         >
-          {edges.map((edge) => (
-            <Edge key={edge.id} edge={edge} />
-          ))}
+          <svg
+            className="absolute top-0 left-0"
+            width="10000"
+            height="10000"
+            style={{ 
+              pointerEvents: 'none',
+            }}
+          >
+            {edges.map((edge) => (
+              <Edge key={edge.id} edge={edge} />
+            ))}
+          </svg>
           {nodes.map((node) => (
             <Node key={node.id} node={node} />
           ))}
