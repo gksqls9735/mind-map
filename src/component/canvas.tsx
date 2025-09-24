@@ -10,10 +10,11 @@ const canvasBackgroundStyle = {
 
 export default function Canvas() {
   const {
-    handleMouseMove, handleMouseUp,
-    handleCanvasClick, handleCanvasDoubleClick,
-    handleSave, handleLoad,
-    edges, nodes
+    handleMouseMove, handleMouseUp, handleCanvasClick,
+    handleCanvasDoubleClick, handleSave, handleLoad,
+    handleCanvasMouseDown,
+    edges, nodes,
+    viewOffset, isPannable, isPanning,
   } = useCanvas();
 
   return (
@@ -30,19 +31,30 @@ export default function Canvas() {
       <Toolbar />
 
       <div
-        className="canvas w-screen h-screen bg-slate-100 relative overflow-hidden"
+        className={`canvas w-screen h-screen bg-slate-100 relative overflow-hidden
+          ${isPannable && 'cursor-grab'}
+          ${isPanning && 'cursor-grabbing'}
+        `}
         style={canvasBackgroundStyle}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onClick={handleCanvasClick}
         onDoubleClick={handleCanvasDoubleClick}
+        onMouseDown={handleCanvasMouseDown}
+        onContextMenu={(e) => e.preventDefault()}
       >
-        {edges.map((edge) => (
-          <Edge key={edge.id} edge={edge} />
-        ))}
-        {nodes.map((node) => (
-          <Node key={node.id} node={node} />
-        ))}
+        <div
+          style={{
+            transform: `translate(${viewOffset.x}px, ${viewOffset.y}px)`,
+          }}
+        >
+          {edges.map((edge) => (
+            <Edge key={edge.id} edge={edge} />
+          ))}
+          {nodes.map((node) => (
+            <Node key={node.id} node={node} />
+          ))}
+        </div>
       </div>
     </div>
   );

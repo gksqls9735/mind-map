@@ -11,6 +11,7 @@ type MindMapState = {
   selectedNodeId: string | null;
   editingNodeId: string | null;
   layoutMode: LayoutMode;
+  viewOffset: { x: number; y: number };
   addNode: (node: Node) => void;
   addEdge: (edge: Edge) => void;
   updateNodePosition: (nodeId: string, movement: { x: number; y: number }) => void;
@@ -23,6 +24,7 @@ type MindMapState = {
   deleteNode: (nodeIdToDelete: string | null) => void;
   setMindMap: (data: { nodes: Node[]; edges: Edge[] }) => void;
   autoLayout: (layoutType: LayoutMode) => void;
+  panView: (delta: { dx: number; dy: number }) => void;
 }
 
 export const useMindMapStore = create<MindMapState>((set, get) => ({
@@ -37,6 +39,7 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
   selectedNodeId: null,
   editingNodeId: null,
   layoutMode: 'none',
+  viewOffset: { x: 0, y: 0 },
   addNode: (node) => set((state) => ({ nodes: [...state.nodes, node] })),
   addEdge: (edge) => set((state) => ({ edges: [...state.edges, edge] })),
   updateNodePosition: (nodeId, movement) =>
@@ -160,6 +163,12 @@ export const useMindMapStore = create<MindMapState>((set, get) => ({
 
     set({ nodes: newNodes, layoutMode: layoutType });
   },
+  panView: (delta) => set((state) => ({
+    viewOffset: {
+      x: state.viewOffset.x + delta.dx,
+      y: state.viewOffset.y + delta.dy,
+    }
+  })),
 }));
 
 // 루트 노드 찾기

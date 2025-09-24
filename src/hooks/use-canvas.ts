@@ -1,22 +1,64 @@
 import { useMindMapStore } from "@/store/store";
 import type { Edge as EdgeType, Node as NodeType } from "@/type/common";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 
 export function useCanvas() {
   const {
     nodes, edges, draggingNodeId, selectedNodeId,
     updateNodePosition, setDraggingNodeId,
-    addNode, addEdge, setSelectedNodeId, setMindMap
+    addNode, addEdge, setSelectedNodeId, setMindMap,
+    viewOffset, panView
   } = useMindMapStore();
 
   const clickTimer = useRef<number | null>(null);
 
+  const [isPannable, setIsPannable] = useState<boolean>(false);
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setIsPannable(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setIsPannable(false);
+        setIsPanning(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  const handleCanvasMouseDown = (e: React.MouseEvent) => {
+    if (isPannable && e.button === 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsPanning(true);
+    }
+  };
+
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (isPanning) {
+      panView({ dx: e.movementX, dy: e.movementY });
+      return;
+    }
     if (draggingNodeId) updateNodePosition(draggingNodeId, { x: e.movementX, y: e.movementY });
   };
 
-  const handleMouseUp = () => setDraggingNodeId(null);
+  const handleMouseUp = () => {
+    setDraggingNodeId(null);
+    setIsPanning(false);
+  }
 
   const handleCanvasClick = () => {
     clickTimer.current = window.setTimeout(() => {
@@ -63,9 +105,9 @@ export function useCanvas() {
   };
 
   return {
-    handleMouseMove, handleMouseUp,
-    handleCanvasClick, handleCanvasDoubleClick,
-    handleSave, handleLoad,
-    edges, nodes
+    handleMouseMove, handleMouseUp, handleCanvasClick, handleCanvasDoubleClick,
+    handleSave, handleLoad, handleCanvasMouseDown,
+    edges, nodes,
+    viewOffset, isPannable, isPanning,
   };
 }
